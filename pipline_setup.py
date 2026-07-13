@@ -1,7 +1,6 @@
 import joblib
 import pandas as pd
 import nltk
-from pandas.io.common import file_exists
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -28,22 +27,32 @@ y = dataset["LABEL"]
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
 
+
 pipeline = Pipeline([
-    ('tfidf', TfidfVectorizer(max_features=10000, stop_words='english')),
-    ('clf', LogisticRegression(class_weight="balanced", random_state=42, max_iter=1000)),
+    ('tfidf', TfidfVectorizer(max_features=8000, stop_words='english', ngram_range=(1, 2))),
+    ('clf', LogisticRegression(C=0.5, random_state=42, max_iter=1000)),
 ])
 
 pipeline.fit(X_train, y_train)
 
 scores = cross_val_score(pipeline, X_train, y_train, cv=5)
-print(f"Average Cross-Validation Accuracy: {scores.mean():.4f}")
+print(f"Average Cross-Validation Accuracy: {scores.mean():.4f}\n")
 
-y_pred = pipeline.predict(X_test)
-print(f"Test Set Accuracy: {accuracy_score(y_test, y_pred)}")
-print(classification_report(y_test, y_pred, target_names=['ham', 'spam', 'smishing']))
+y_pred_train = pipeline.predict(X_train)
+y_pred_test = pipeline.predict(X_test)
 
-if not file_exists('model.pkl'):
-    joblib.dump(pipeline, "model.pkl")
-    print(f"Model saved!")
-else:
-    pass
+print("="*60)
+print(" Train data result: ")
+print("="*60)
+print(f"Train Accuracy: {accuracy_score(y_train, y_pred_train):.4f}")
+print(classification_report(y_train, y_pred_train, target_names=['ham', 'spam', 'smishing']))
+
+print("="*60)
+print(" Test data result: ")
+print("="*60)
+print("="*60)
+print(f"Test Accuracy: {accuracy_score(y_test, y_pred_test):.4f}")
+print(classification_report(y_test, y_pred_test, target_names=['ham', 'spam', 'smishing']))
+
+joblib.dump(pipeline, "model.pkl")
+print("\nModel saved successfully as 'model.pkl'!")
