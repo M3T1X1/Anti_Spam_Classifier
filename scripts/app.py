@@ -1,5 +1,5 @@
 import os
-import time  # Import modułu do mierzenia czasu
+import time
 
 os.environ["HF_HUB_OFFLINE"] = "1"
 

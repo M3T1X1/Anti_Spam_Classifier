@@ -5,8 +5,8 @@ from nltk.tokenize import sent_tokenize
 try:
     nltk.data.find('tokenizers/punkt')
 except LookupError:
+    nltk.download('punkt_tab')
     nltk.download('punkt')
-
 
 def augment_text_dataset(input_file_path, output_file_path, min_words=3):
     df = pd.read_csv(input_file_path)

@@ -6,8 +6,12 @@ from sklearn.metrics import accuracy_score, classification_report
 from transformers import DistilBertTokenizerFast, DistilBertForSequenceClassification
 from transformers import Trainer, TrainingArguments
 from datasets import Dataset as HFDataset
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+from transformers import DataCollatorWithPadding
 
-dataset = pd.read_csv("../dataset.csv")
+dataset = pd.read_csv("../dataset_augmented.csv")
 
 label_map = {'ham': 0, 'spam': 1, 'smishing': 2}
 dataset['LABEL'] = dataset['LABEL'].map(label_map)
@@ -16,9 +20,6 @@ df = pd.DataFrame({
     'text': dataset["TEXT"].astype(str),
     'label': dataset["LABEL"]
 })
-
-if len(df) > 3000:
-    df, _ = train_test_split(df, train_size=3000, stratify=df['label'], random_state=42)
 
 train_df, test_df = train_test_split(df, test_size=0.1, random_state=42, stratify=df['label'])
 
@@ -48,6 +49,11 @@ model = DistilBertForSequenceClassification.from_pretrained(
 )
 model.to(device)
 
+def tokenize_function(examples):
+    return tokenizer(examples['text'], truncation=True)
+
+data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
+
 def compute_metrics(eval_pred):
     logits, labels = eval_pred
     predictions = np.argmax(logits, axis=-1)
@@ -57,9 +63,9 @@ def compute_metrics(eval_pred):
 training_args = TrainingArguments(
     output_dir="../results",
     num_train_epochs=3,
-    per_device_train_batch_size=32,
+    per_device_train_batch_size=64,
     per_device_eval_batch_size=64,
-    fp16=False,
+    fp16=True,
     dataloader_num_workers=2,
     eval_strategy="epoch",
     save_strategy="epoch",
@@ -79,6 +85,7 @@ trainer = Trainer(
     train_dataset=train_dataset,
     eval_dataset=test_dataset,
     compute_metrics=compute_metrics,
+    data_collator=data_collator
 )
 
 print("Training...")
@@ -99,3 +106,7 @@ OUTPUT_DIR = "../distilbert_spam_model"
 model.save_pretrained(OUTPUT_DIR)
 tokenizer.save_pretrained(OUTPUT_DIR)
 print(f"\nModel and Tokenizer saved at: '{OUTPUT_DIR}'!")
+
+cm = confusion_matrix(y_test, y_pred_test)
+sns.heatmap(cm, annot=True, fmt='d', xticklabels=label_map.keys(), yticklabels=label_map.keys())
+plt.show()
