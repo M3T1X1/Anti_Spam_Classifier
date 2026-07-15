@@ -69,7 +69,6 @@
     </main>
 
     <script>
-    // Inicjalizacja pierwszego wykresu
     const chart = new Chart(document.getElementById('classificationChart'), {
         type: 'bar',
         data: {
@@ -96,8 +95,6 @@
             }
         }
     });
-
-    // Inicjalizacja drugiego wykresu
     const feedbackChart = new Chart(document.getElementById('feedbackChart'), {
         type: 'bar',
         data: {
@@ -125,7 +122,6 @@
         }
     });
 
-    // Funkcja pomocnicza do eksportu
     const exportAsJpg = (chartInstance, fileName) => {
         const link = document.createElement('a');
         link.href = chartInstance.toBase64Image('image/jpeg', 1);
@@ -149,11 +145,9 @@
         pdf.save(`${fileName}.pdf`);
     };
 
-    // Event Listenery dla pierwszego wykresu
     document.getElementById('exportJpg').addEventListener('click', () => exportAsJpg(chart, 'message-classification-chart'));
     document.getElementById('exportPdf').addEventListener('click', () => exportAsPdf(chart, 'Message classification analysis', 'message-classification-chart'));
 
-    // Event Listenery dla drugiego wykresu
     document.getElementById('exportFeedbackJpg').addEventListener('click', () => exportAsJpg(feedbackChart, 'prediction-accuracy-chart'));
     document.getElementById('exportFeedbackPdf').addEventListener('click', () => exportAsPdf(feedbackChart, 'Prediction accuracy analysis', 'prediction-accuracy-chart'));
 </script>
