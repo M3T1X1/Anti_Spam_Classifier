@@ -79,7 +79,6 @@
                     <table class="messages-table">
                         <thead>
                             <tr>
-                                <th>ID</th>
                                 <th>Email</th>
                                 <th>Message</th>
                                 <th>Type</th>
@@ -89,7 +88,6 @@
                         <tbody>
                             {% for message in messages %}
                                 <tr>
-                                    <td>{{ message.message_id }}</td>
                                     <td>{{ message.email }}</td>
                                     <td class="message-value">{{ message.value }}</td>
                                     <td>
