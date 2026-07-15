@@ -61,87 +61,101 @@
             <div class="chart-container">
                 <canvas id="feedbackChart" aria-label="Bar chart of prediction accuracy"></canvas>
             </div>
-            <p class="unrated-note">Not rated yet: {{ unrated_count }}</p>
+            <div class="export-actions">
+            <button type="button" id="exportFeedbackJpg" class="btn btn-export">Export as JPG</button>
+            <button type="button" id="exportFeedbackPdf" class="btn btn-export">Export as PDF</button>
+    </div>
         </section>
     </main>
 
     <script>
-        const chart = new Chart(document.getElementById('classificationChart'), {
-            type: 'bar',
-            data: {
-                labels: ['HAM', 'Not HAM'],
-                datasets: [{
-                    label: 'Number of messages',
-                    data: {{ [ham_count, not_ham_count] | tojson }},
-                    backgroundColor: ['#10b981', '#ef4444'],
-                    borderColor: ['#6ee7b7', '#fca5a5'],
-                    borderWidth: 1,
-                    borderRadius: 6
-                }]
+    // Inicjalizacja pierwszego wykresu
+    const chart = new Chart(document.getElementById('classificationChart'), {
+        type: 'bar',
+        data: {
+            labels: ['HAM', 'Not HAM'],
+            datasets: [{
+                label: 'Number of messages',
+                data: {{ [ham_count, not_ham_count] | tojson }},
+                backgroundColor: ['#10b981', '#ef4444'],
+                borderColor: ['#6ee7b7', '#fca5a5'],
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: context => `${context.parsed.y} message(s)` } }
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { callbacks: { label: context => `${context.parsed.y} message(s)` } }
-                },
-                scales: {
-                    y: { beginAtZero: true, ticks: { precision: 0, color: '#cbd5e1' }, grid: { color: '#334155' } },
-                    x: { ticks: { color: '#f8fafc' }, grid: { display: false } }
-                }
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0, color: '#cbd5e1' }, grid: { color: '#334155' } },
+                x: { ticks: { color: '#f8fafc' }, grid: { display: false } }
             }
-        });
+        }
+    });
 
-        new Chart(document.getElementById('feedbackChart'), {
-            type: 'bar',
-            data: {
-                labels: ['Correct', 'Incorrect'],
-                datasets: [{
-                    label: 'User feedback',
-                    data: {{ [correct_count, incorrect_count] | tojson }},
-                    backgroundColor: ['#10b981', '#ef4444'],
-                    borderColor: ['#6ee7b7', '#fca5a5'],
-                    borderWidth: 1,
-                    borderRadius: 6
-                }]
+    // Inicjalizacja drugiego wykresu
+    const feedbackChart = new Chart(document.getElementById('feedbackChart'), {
+        type: 'bar',
+        data: {
+            labels: ['Correct', 'Incorrect'],
+            datasets: [{
+                label: 'User feedback',
+                data: {{ [correct_count, incorrect_count] | tojson }},
+                backgroundColor: ['#10b981', '#ef4444'],
+                borderColor: ['#6ee7b7', '#fca5a5'],
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: context => `${context.parsed.y} rating(s)` } }
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { callbacks: { label: context => `${context.parsed.y} rating(s)` } }
-                },
-                scales: {
-                    y: { beginAtZero: true, ticks: { precision: 0, color: '#cbd5e1' }, grid: { color: '#334155' } },
-                    x: { ticks: { color: '#f8fafc' }, grid: { display: false } }
-                }
+            scales: {
+                y: { beginAtZero: true, ticks: { precision: 0, color: '#cbd5e1' }, grid: { color: '#334155' } },
+                x: { ticks: { color: '#f8fafc' }, grid: { display: false } }
             }
-        });
+        }
+    });
 
-        document.getElementById('exportJpg').addEventListener('click', () => {
-            const link = document.createElement('a');
-            link.href = chart.toBase64Image('image/jpeg', 1);
-            link.download = 'message-classification-chart.jpg';
-            link.click();
-        });
+    // Funkcja pomocnicza do eksportu
+    const exportAsJpg = (chartInstance, fileName) => {
+        const link = document.createElement('a');
+        link.href = chartInstance.toBase64Image('image/jpeg', 1);
+        link.download = `${fileName}.jpg`;
+        link.click();
+    };
 
-        document.getElementById('exportPdf').addEventListener('click', () => {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-            const image = chart.toBase64Image('image/jpeg', 1);
-            const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            const margin = 15;
-            const imageWidth = pageWidth - (margin * 2);
-            const imageHeight = imageWidth * (chart.height / chart.width);
+    const exportAsPdf = (chartInstance, title, fileName) => {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+        const image = chartInstance.toBase64Image('image/jpeg', 1);
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const margin = 15;
+        const imageWidth = pageWidth - (margin * 2);
+        const imageHeight = imageWidth * (chartInstance.height / chartInstance.width);
 
-            pdf.setFontSize(16);
-            pdf.text('Message classification analysis', margin, 15);
-            pdf.addImage(image, 'JPEG', margin, 25, imageWidth, Math.min(imageHeight, pageHeight - 40));
-            pdf.save('message-classification-chart.pdf');
-        });
-    </script>
+        pdf.setFontSize(16);
+        pdf.text(title, margin, 15);
+        pdf.addImage(image, 'JPEG', margin, 25, imageWidth, Math.min(imageHeight, pageHeight - 40));
+        pdf.save(`${fileName}.pdf`);
+    };
+
+    // Event Listenery dla pierwszego wykresu
+    document.getElementById('exportJpg').addEventListener('click', () => exportAsJpg(chart, 'message-classification-chart'));
+    document.getElementById('exportPdf').addEventListener('click', () => exportAsPdf(chart, 'Message classification analysis', 'message-classification-chart'));
+
+    // Event Listenery dla drugiego wykresu
+    document.getElementById('exportFeedbackJpg').addEventListener('click', () => exportAsJpg(feedbackChart, 'prediction-accuracy-chart'));
+    document.getElementById('exportFeedbackPdf').addEventListener('click', () => exportAsPdf(feedbackChart, 'Prediction accuracy analysis', 'prediction-accuracy-chart'));
+</script>
 </body>
 </html>
