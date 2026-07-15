@@ -54,6 +54,15 @@
                 <button type="button" id="exportPdf" class="btn btn-export">Export as PDF</button>
             </div>
         </section>
+
+        <section class="card chart-card feedback-chart-card">
+            <h2>Prediction accuracy</h2>
+            <p>User feedback on whether the model classification was correct.</p>
+            <div class="chart-container">
+                <canvas id="feedbackChart" aria-label="Bar chart of prediction accuracy"></canvas>
+            </div>
+            <p class="unrated-note">Not rated yet: {{ unrated_count }}</p>
+        </section>
     </main>
 
     <script>
@@ -76,6 +85,33 @@
                 plugins: {
                     legend: { display: false },
                     tooltip: { callbacks: { label: context => `${context.parsed.y} message(s)` } }
+                },
+                scales: {
+                    y: { beginAtZero: true, ticks: { precision: 0, color: '#cbd5e1' }, grid: { color: '#334155' } },
+                    x: { ticks: { color: '#f8fafc' }, grid: { display: false } }
+                }
+            }
+        });
+
+        new Chart(document.getElementById('feedbackChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Correct', 'Incorrect'],
+                datasets: [{
+                    label: 'User feedback',
+                    data: {{ [correct_count, incorrect_count] | tojson }},
+                    backgroundColor: ['#10b981', '#ef4444'],
+                    borderColor: ['#6ee7b7', '#fca5a5'],
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: context => `${context.parsed.y} rating(s)` } }
                 },
                 scales: {
                     y: { beginAtZero: true, ticks: { precision: 0, color: '#cbd5e1' }, grid: { color: '#334155' } },

@@ -4,7 +4,6 @@ import time
 from pathlib import Path
 from functools import wraps
 
-# Add parent directory to path BEFORE imports
 base_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(base_dir))
 
@@ -166,6 +165,7 @@ def index_redirect():
 def dashboard():
     """Analyse a message and display the signed-in user's saved history."""
     result = None
+    saved_message_id = None
     if request.method == "POST":
         user_input = request.form.get("message", "").strip()
         if user_input:
@@ -176,16 +176,21 @@ def dashboard():
 
                 # Only authenticated users have their analyses saved.
                 if 'email' in session:
-                    db.session.add(Message(
+                    message = Message(
                         email=session['email'],
                         value=user_input,
-                        is_ham=(result == 'ham')
-                    ))
+                        is_ham=(result == 'ham'),
+                    )
+                    db.session.add(message)
                     db.session.commit()
+                    saved_message_id = message.message_id
+                else:
+                    saved_message_id = None
             except Exception as err:
                 db.session.rollback()
                 print(f"Error message: {str(err)}")
                 result = "Internal error"
+                saved_message_id = None
 
     page = max(request.args.get('page', 1, type=int), 1)
     sort_by = request.args.get('sort', 'date_desc', type=str)
@@ -231,9 +236,35 @@ def dashboard():
         sort_by=sort_by,
         filter_ham=filter_ham,
         result=result,
+        saved_message_id=saved_message_id,
         user=session.get('name') if 'email' in session else None,
         is_guest='email' not in session
     )
+
+
+@app.route("/message-feedback", methods=["POST"])
+@login_required
+def message_feedback():
+    """Save the user's assessment of a classifier prediction."""
+    message_id = request.form.get('message_id', type=int)
+    feedback = request.form.get('feedback')
+
+    if not message_id or feedback not in {'correct', 'incorrect'}:
+        flash('Invalid prediction feedback.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    message = Message.query.filter_by(
+        message_id=message_id,
+        email=session['email']
+    ).first()
+    if message is None:
+        flash('This message cannot be rated.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    message.is_correct = feedback == 'correct'
+    db.session.commit()
+    flash('Thank you for rating the prediction.', 'success')
+    return redirect(url_for('dashboard'))
 
 
 @app.route("/analytics", methods=["GET"])
@@ -255,6 +286,14 @@ def analytics():
     )
     ham_count = classification_counts.get(True, 0)
     not_ham_count = classification_counts.get(False, 0)
+    total_count = ham_count + not_ham_count
+
+    feedback_query = db.session.query(Message.is_correct, func.count(Message.message_id))
+    if scope == 'mine':
+        feedback_query = feedback_query.filter(Message.email == session['email'])
+    feedback_counts = dict(feedback_query.group_by(Message.is_correct).all())
+    correct_count = feedback_counts.get(True, 0)
+    incorrect_count = feedback_counts.get(False, 0)
 
     return render_template(
         "analytics.html",
@@ -262,7 +301,10 @@ def analytics():
         scope=scope,
         ham_count=ham_count,
         not_ham_count=not_ham_count,
-        total_count=ham_count + not_ham_count
+        total_count=total_count,
+        correct_count=correct_count,
+        incorrect_count=incorrect_count,
+        unrated_count=total_count - correct_count - incorrect_count,
     )
 
 

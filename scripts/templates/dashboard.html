@@ -39,17 +39,31 @@
         {% endwith %}
 
         <section class="card dashboard-card analyzer-card">
-            <form method="post" action="{{ url_for('dashboard') }}">
-                <label for="message" class="analyzer-label">Message to analyse</label>
-                <textarea id="message" name="message" placeholder="Paste your message here..." required></textarea>
-                <button type="submit">Run analysis</button>
-            </form>
+            <div class="analyzer-layout">
+                <form method="post" action="{{ url_for('dashboard') }}">
+                    <label for="message" class="analyzer-label">Message to analyse</label>
+                    <textarea id="message" name="message" placeholder="Paste your message here..." required></textarea>
+                    <button type="submit">Run analysis</button>
+                </form>
 
-            {% if result %}
-                <div class="result-box {{ result }}">
-                    <strong>Classification:</strong> {{ result | upper }}
-                </div>
-            {% endif %}
+                {% if result %}
+                    <aside class="prediction-panel">
+                        <div class="result-box {{ result }}">
+                            <strong>Classification:</strong> {{ result | upper }}
+                        </div>
+                        {% if saved_message_id %}
+                            <form method="post" action="{{ url_for('message_feedback') }}" class="feedback-form">
+                                <input type="hidden" name="message_id" value="{{ saved_message_id }}">
+                                <span>Was this prediction correct?</span>
+                                <button type="submit" name="feedback" value="correct" class="feedback-button feedback-correct" aria-label="Prediction was correct" title="Prediction was correct">👍</button>
+                                <button type="submit" name="feedback" value="incorrect" class="feedback-button feedback-incorrect" aria-label="Prediction was incorrect" title="Prediction was incorrect">👎</button>
+                            </form>
+                        {% elif is_guest %}
+                            <p class="feedback-guest-note">Log in to save and rate this prediction.</p>
+                        {% endif %}
+                    </aside>
+                {% endif %}
+            </div>
         </section>
 
         <section class="card dashboard-card history-card">
@@ -83,6 +97,7 @@
                                 <th>Email</th>
                                 <th>Message</th>
                                 <th>Type</th>
+                                <th>Feedback</th>
                                 <th>Date</th>
                             </tr>
                         </thead>
@@ -95,6 +110,15 @@
                                         <span class="status-badge {% if message.is_ham %}status-ham{% else %}status-not-ham{% endif %}">
                                             {% if message.is_ham %}HAM{% else %}NOT HAM{% endif %}
                                         </span>
+                                    </td>
+                                    <td>
+                                        {% if message.is_correct is true %}
+                                            <span class="feedback-status feedback-positive">Correct</span>
+                                        {% elif message.is_correct is false %}
+                                            <span class="feedback-status feedback-negative">Incorrect</span>
+                                        {% else %}
+                                            <span class="feedback-status feedback-pending">Not rated</span>
+                                        {% endif %}
                                     </td>
                                     <td>{{ message.created_at.strftime('%Y-%m-%d %H:%M') if message.created_at else '—' }}</td>
                                 </tr>

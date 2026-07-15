@@ -30,6 +30,7 @@ class Message(db.Model):
     email = db.Column(db.String, db.ForeignKey('users.email'), nullable=False)
     value = db.Column(db.String(10000))
     is_ham = db.Column(db.Boolean)
+    is_correct = db.Column(db.Boolean, nullable=True)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
 class Plot(db.Model):
