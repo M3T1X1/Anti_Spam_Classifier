@@ -15,6 +15,9 @@
                     {% if user %}
                         <span>Logged in as: <strong>{{ user }}</strong></span>
                         <a href="{{ url_for('logout') }}" class="btn btn-logout">Sign Out</a>
+                    {% elif is_guest %}
+                        <span>Guest Mode</span>
+                        <a href="{{ url_for('login') }}" class="btn btn-logout">Back to Login</a>
                     {% endif %}
                 </div>
             </div>

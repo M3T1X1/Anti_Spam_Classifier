@@ -73,7 +73,7 @@ button {
 button:hover { opacity: 0.9; }
 
 .btn {
-    display: inline-block;
+    display: block;
     padding: 10px 20px;
     border-radius: 6px;
     font-weight: 600;
@@ -82,11 +82,17 @@ button:hover { opacity: 0.9; }
     cursor: pointer;
     border: none;
     transition: opacity 0.2s;
+    box-sizing: border-box;
 }
 
 .btn-primary {
     background-color: var(--accent);
     color: #0f172a;
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    display: block;
 }
 
 .btn-primary:hover {
@@ -98,6 +104,28 @@ button:hover { opacity: 0.9; }
     color: white;
     font-size: 0.85rem;
     padding: 8px 16px;
+    display: inline-block;
+}
+
+.divider-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0 1rem 0;
+}
+
+.divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #475569, transparent);
+}
+
+.divider-text {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
 }
 
 .result-box {

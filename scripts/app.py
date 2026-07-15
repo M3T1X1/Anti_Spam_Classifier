@@ -4,14 +4,14 @@ import time
 from pathlib import Path
 from functools import wraps
 
-# Add parent directory to path so we can import database module
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add parent directory to path BEFORE imports
+base_dir = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(base_dir))
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from transformers import pipeline
 from database.models import User, Message, Plot
 from database.db import db, init_db
-
 
 os.environ["HF_HUB_OFFLINE"] = "1"
 
@@ -24,8 +24,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'your-secret-key-change-this'
 init_db(app)
 
-
 classifier = None
+
+LABEL_MAP = {
+    'LABEL_0': 'ham', 'LABEL_1': 'spam', 'LABEL_2': 'smishing',
+    'ham': 'ham', 'spam': 'spam', 'smishing': 'smishing'
+}
+
 
 def get_classifier():
     global classifier
@@ -63,12 +68,6 @@ def login_required(f):
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
-
-
-LABEL_MAP = {
-    'LABEL_0': 'ham', 'LABEL_1': 'spam', 'LABEL_2': 'smishing',
-    'ham': 'ham', 'spam': 'spam', 'smishing': 'smishing'
-}
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -146,6 +145,30 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route("/guest", methods=["GET", "POST"])
+def guest():
+    """Guest mode - no login required"""
+    result = None
+    if request.method == "POST":
+        user_input = request.form.get("message")
+        if user_input and user_input.strip():
+            try:
+                clf = get_classifier()
+                predictions = clf(user_input.strip())
+
+                print("User message: ", user_input)
+                print(f"[DEBUG RAW PREDICTION] {predictions}")
+                raw_label = predictions[0]['label']
+                result = LABEL_MAP.get(raw_label, "unknown")
+                print(f"[DEBUG MAPPED RESULT] {result}")
+
+            except Exception as err:
+                print(f"Error message: {str(err)}")
+                result = f"Internal error"
+
+    return render_template("try_it.html", result=result, user=None, is_guest=True)
+
+
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
@@ -176,7 +199,7 @@ def index():
                 print(f"Error message: {str(err)}")
                 result = f"Internal error"
 
-    return render_template("index.html", result=result, user=session.get('name'))
+    return render_template("try_it.html", result=result, user=session.get('name'), is_guest=False)
 
 
 if __name__ == "__main__":
