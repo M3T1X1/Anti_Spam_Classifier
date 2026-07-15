@@ -35,21 +35,21 @@ DEMO_USERS = (
 )
 
 DEMO_MESSAGES = (
-    ("anna.demo@example.com", "Hi, are we still meeting at 5 PM today?", True),
-    ("anna.demo@example.com", "Congratulations! Claim your prize now by clicking this link.", False),
-    ("anna.demo@example.com", "Please send me the presentation when you have a moment.", True),
-    ("anna.demo@example.com", "Your account will be closed today. Verify your password immediately.", False),
-    ("anna.demo@example.com", "Thank you for your help with the project.", True),
-    ("anna.demo@example.com", "You have been selected for a cash reward. Reply YES to claim it.", False),
-    ("anna.demo@example.com", "I will call you after my appointment.", True),
-    ("anna.demo@example.com", "URGENT: confirm your bank details at the attached website.", False),
-    ("anna.demo@example.com", "The delivery should arrive tomorrow morning.", True),
-    ("anna.demo@example.com", "Free gift card available now — enter your details to receive it.", False),
-    ("anna.demo@example.com", "Could you pick up some bread on your way home?", True),
-    ("anna.demo@example.com", "Final notice: pay the outstanding fee to avoid legal action.", False),
-    ("jan.demo@example.com", "I have attached the notes from today's meeting.", True),
-    ("jan.demo@example.com", "You won a new phone! Click here to arrange delivery.", False),
-    ("jan.demo@example.com", "See you at the station at noon.", True),
+    ("anna.demo@example.com", "Hi, are we still meeting at 5 PM today?", True, False),
+    ("anna.demo@example.com", "Congratulations! Claim your prize now by clicking this link.", False, False),
+    ("anna.demo@example.com", "Please send me the presentation when you have a moment.", True, False),
+    ("anna.demo@example.com", "Your account will be closed today. Verify your password immediately.", False, True),
+    ("anna.demo@example.com", "Thank you for your help with the project.", True, True),
+    ("anna.demo@example.com", "You have been selected for a cash reward. Reply YES to claim it.", False, True),
+    ("anna.demo@example.com", "I will call you after my appointment.", True, True),
+    ("anna.demo@example.com", "URGENT: confirm your bank details at the attached website.", False, True),
+    ("anna.demo@example.com", "The delivery should arrive tomorrow morning.", True, True),
+    ("anna.demo@example.com", "Free gift card available now — enter your details to receive it.", False, True),
+    ("anna.demo@example.com", "Could you pick up some bread on your way home?", True, True),
+    ("anna.demo@example.com", "Final notice: pay the outstanding fee to avoid legal action.", False, True),
+    ("jan.demo@example.com", "I have attached the notes from today's meeting.", True, False),
+    ("jan.demo@example.com", "You won a new phone! Click here to arrange delivery.", False, True),
+    ("jan.demo@example.com", "See you at the station at noon.", True, True),
 )
 
 
@@ -81,7 +81,7 @@ def seed():
 
         db.session.flush()
         start_date = datetime.now() - timedelta(days=len(DEMO_MESSAGES))
-        for index, (email, value, is_ham) in enumerate(DEMO_MESSAGES):
+        for index, (email, value, is_ham, is_correct) in enumerate(DEMO_MESSAGES):
             already_exists = Message.query.filter_by(email=email, value=value).first()
             if already_exists:
                 continue
@@ -89,6 +89,7 @@ def seed():
                 email=email,
                 value=value,
                 is_ham=is_ham,
+                is_correct = is_correct,
                 created_at=start_date + timedelta(days=index),
             ))
             messages_created += 1
