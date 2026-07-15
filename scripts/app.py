@@ -8,7 +8,7 @@ from functools import wraps
 base_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(base_dir))
 
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
 from sqlalchemy import func
 from transformers import pipeline
 from database.models import User, Message, Plot
@@ -69,6 +69,12 @@ def login_required(f):
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
+
+
+@app.route("/favicon.png")
+def favicon():
+    """Serve the application favicon stored in the project root."""
+    return send_from_directory(BASE_DIR, "favicon.png", mimetype="image/png")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
