@@ -58,5 +58,8 @@ htmlcov/
 logs/
 *.log
 
+# Database
+*.sqlite3
+
 /distilbert_spam_model
 /results

@@ -9,9 +9,25 @@
 <body>
     <div class="main-wrapper">
         <header>
-            <h1>Security Classifier</h1>
+            <div class="header-top">
+                <h1>Security Classifier</h1>
+                <div class="user-info">
+                    {% if user %}
+                        <span>Zalogowano jako: <strong>{{ user }}</strong></span>
+                        <a href="{{ url_for('logout') }}" class="btn btn-logout">Wyloguj</a>
+                    {% endif %}
+                </div>
+            </div>
             <p>Advanced text analysis for threat detection</p>
         </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
 
         <section class="card">
             <form method="POST">
