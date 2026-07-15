@@ -6,6 +6,7 @@
     <title>Data analysis</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
 </head>
 <body>
     <main class="dashboard-wrapper">
@@ -13,7 +14,7 @@
             <div class="page-heading">
                 <div>
                     <h1>Data analysis</h1>
-                    <p>Classification summary for {{ user }}.</p>
+                    <p>Classification summary.</p>
                 </div>
                 <nav class="top-actions" aria-label="Account navigation">
                     <a href="{{ url_for('dashboard') }}" class="btn btn-analytics">Message history</a>
@@ -21,6 +22,19 @@
                 </nav>
             </div>
         </header>
+
+        <section class="card analytics-filter-card">
+            <form method="get" class="table-controls">
+                <div class="control-group">
+                    <label for="scope">Data scope</label>
+                    <select id="scope" name="scope">
+                        <option value="all" {% if scope == 'all' %}selected{% endif %}>All messages</option>
+                        <option value="mine" {% if scope == 'mine' %}selected{% endif %}>My messages</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-filter">Update analysis</button>
+            </form>
+        </section>
 
         <section class="analytics-summary" aria-label="Message summary">
             <div class="summary-card"><span>Total analyses</span><strong>{{ total_count }}</strong></div>
@@ -34,11 +48,15 @@
             <div class="chart-container">
                 <canvas id="classificationChart" aria-label="Bar chart of message classifications"></canvas>
             </div>
+            <div class="export-actions">
+                <button type="button" id="exportJpg" class="btn btn-export">Export as JPG</button>
+                <button type="button" id="exportPdf" class="btn btn-export">Export as PDF</button>
+            </div>
         </section>
     </main>
 
     <script>
-        new Chart(document.getElementById('classificationChart'), {
+        const chart = new Chart(document.getElementById('classificationChart'), {
             type: 'bar',
             data: {
                 labels: ['HAM', 'Not HAM'],
@@ -63,6 +81,29 @@
                     x: { ticks: { color: '#f8fafc' }, grid: { display: false } }
                 }
             }
+        });
+
+        document.getElementById('exportJpg').addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.href = chart.toBase64Image('image/jpeg', 1);
+            link.download = 'message-classification-chart.jpg';
+            link.click();
+        });
+
+        document.getElementById('exportPdf').addEventListener('click', () => {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+            const image = chart.toBase64Image('image/jpeg', 1);
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const margin = 15;
+            const imageWidth = pageWidth - (margin * 2);
+            const imageHeight = imageWidth * (chart.height / chart.width);
+
+            pdf.setFontSize(16);
+            pdf.text('Message classification analysis', margin, 15);
+            pdf.addImage(image, 'JPEG', margin, 25, imageWidth, Math.min(imageHeight, pageHeight - 40));
+            pdf.save('message-classification-chart.pdf');
         });
     </script>
 </body>

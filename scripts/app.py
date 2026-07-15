@@ -192,12 +192,9 @@ def dashboard():
     if filter_ham not in valid_filters:
         filter_ham = 'all'
 
-    # Signed-in users see their own history. Guests can browse all messages
-    # already saved by authenticated users, but their own analyses are not saved.
-    if 'email' in session:
-        query = Message.query.filter_by(email=session['email'])
-    else:
-        query = Message.query
+    # The table is shared: it shows all analyses saved by authenticated users.
+    # Guest analyses are never added to this query because they are not persisted.
+    query = Message.query
 
     # Apply filter
     if filter_ham == 'ham':
@@ -237,9 +234,16 @@ def dashboard():
 @login_required
 def analytics():
     """Show interactive classification statistics for the signed-in user."""
+    scope = request.args.get('scope', 'all', type=str)
+    if scope not in {'all', 'mine'}:
+        scope = 'all'
+
+    query = db.session.query(Message.is_ham, func.count(Message.message_id))
+    if scope == 'mine':
+        query = query.filter(Message.email == session['email'])
+
     classification_counts = dict(
-        db.session.query(Message.is_ham, func.count(Message.message_id))
-        .filter(Message.email == session['email'])
+        query
         .group_by(Message.is_ham)
         .all()
     )
@@ -249,6 +253,7 @@ def analytics():
     return render_template(
         "analytics.html",
         user=session.get('name'),
+        scope=scope,
         ham_count=ham_count,
         not_ham_count=not_ham_count,
         total_count=ham_count + not_ham_count

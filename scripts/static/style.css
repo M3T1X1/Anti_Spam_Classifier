@@ -309,6 +309,10 @@ button:hover { opacity: 0.9; }
 .chart-card h2 { margin: 0 0 0.5rem; }
 .chart-card p { color: #cbd5e1; margin: 0 0 1.5rem; }
 .chart-container { height: 360px; position: relative; }
+.analytics-filter-card { margin-bottom: 1.5rem; }
+.analytics-filter-card .table-controls { margin: 0; }
+.export-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
+.btn-export { width: auto; margin: 0; padding: 10px 16px; background: #334155; color: var(--text-main); }
 
 @media (max-width: 640px) {
     .dashboard-wrapper { width: min(100% - 24px, 1200px); margin: 24px auto; }
@@ -320,4 +324,6 @@ button:hover { opacity: 0.9; }
     .top-actions .btn { flex: 1; }
     .analytics-summary { grid-template-columns: 1fr; }
     .chart-container { height: 280px; }
+    .export-actions { flex-direction: column; }
+    .btn-export { width: 100%; }
 }
