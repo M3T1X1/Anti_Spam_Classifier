@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message history</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="dashboard-wrapper">
+        <header class="dashboard-header">
+            <h1>Message history</h1>
+            {% if user %}
+                <p>Saved analyses for {{ user }}.</p>
+            {% else %}
+                <p>Sign in to view your saved analyses.</p>
+            {% endif %}
+        </header>
+
+        {% with notifications = get_flashed_messages(with_categories=true) %}
+            {% for category, notification in notifications %}
+                <div class="alert alert-{{ category }}">{{ notification }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <section class="card dashboard-card analyzer-card">
+            <form method="post" action="{{ url_for('dashboard') }}">
+                <label for="message" class="analyzer-label">Message to analyse</label>
+                <textarea id="message" name="message" placeholder="Paste your message here..." required></textarea>
+                <button type="submit">Run analysis</button>
+            </form>
+
+            {% if result %}
+                <div class="result-box {{ result }}">
+                    <strong>Classification:</strong> {{ result | upper }}
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="card dashboard-card history-card">
+            <h2>Saved messages</h2>
+            <form method="get" class="table-controls">
+                <div class="control-group">
+                    <label for="filter">Status</label>
+                    <select id="filter" name="filter">
+                        <option value="all" {% if filter_ham == 'all' %}selected{% endif %}>All messages</option>
+                        <option value="ham" {% if filter_ham == 'ham' %}selected{% endif %}>HAM</option>
+                        <option value="not_ham" {% if filter_ham == 'not_ham' %}selected{% endif %}>Not HAM</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label for="sort">Sort by</label>
+                    <select id="sort" name="sort">
+                        <option value="date_desc" {% if sort_by == 'date_desc' %}selected{% endif %}>Date: newest first</option>
+                        <option value="date_asc" {% if sort_by == 'date_asc' %}selected{% endif %}>Date: oldest first</option>
+                        <option value="type_asc" {% if sort_by == 'type_asc' %}selected{% endif %}>Status: not HAM first</option>
+                        <option value="type_desc" {% if sort_by == 'type_desc' %}selected{% endif %}>Status: HAM first</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-filter">Apply</button>
+            </form>
+
+            {% if messages %}
+                <div class="table-scroll">
+                    <table class="messages-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>Message</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for message in messages %}
+                                <tr>
+                                    <td>{{ message.message_id }}</td>
+                                    <td>{{ message.email }}</td>
+                                    <td class="message-value">{{ message.value }}</td>
+                                    <td>
+                                        <span class="status-badge {% if message.is_ham %}status-ham{% else %}status-not-ham{% endif %}">
+                                            {% if message.is_ham %}HAM{% else %}NOT HAM{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>{{ message.created_at.strftime('%Y-%m-%d %H:%M') if message.created_at else '—' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if total_pages > 1 %}
+                    <nav class="pagination" aria-label="Message pages">
+                        {% if page > 1 %}
+                            <a href="{{ url_for('dashboard', page=page - 1, sort=sort_by, filter=filter_ham) }}">Previous</a>
+                        {% endif %}
+                        <span>Page {{ page }} of {{ total_pages }}</span>
+                        {% if page < total_pages %}
+                            <a href="{{ url_for('dashboard', page=page + 1, sort=sort_by, filter=filter_ham) }}">Next</a>
+                        {% endif %}
+                    </nav>
+                {% endif %}
+            {% else %}
+                <p class="empty-state">No saved messages match the selected filter.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

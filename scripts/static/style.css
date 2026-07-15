@@ -242,3 +242,64 @@ button:hover { opacity: 0.9; }
     color: #bae6fd;
     border: 1px solid #0284c7;
 }
+
+/* Message history */
+.dashboard-wrapper {
+    width: min(1200px, calc(100% - 40px));
+    margin: 60px auto;
+}
+
+.dashboard-header { margin-bottom: 1.5rem; }
+.dashboard-header h1 { margin: 0 0 0.5rem; }
+.dashboard-header p { color: #cbd5e1; margin: 0; }
+.dashboard-card { padding: 1.5rem; }
+.analyzer-card { margin-bottom: 1.5rem; }
+.analyzer-label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+.history-card h2 { margin: 0 0 1.5rem; }
+
+.table-controls {
+    display: flex;
+    align-items: end;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.control-group { flex: 1; }
+.control-group label { display: block; margin-bottom: 0.45rem; font-weight: 600; }
+.control-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    background: #0f172a;
+    color: var(--text-main);
+    font: inherit;
+}
+
+.btn-filter { width: auto; margin: 0; padding: 10px 22px; }
+.table-scroll { overflow-x: auto; }
+.messages-table { width: 100%; border-collapse: collapse; min-width: 760px; }
+.messages-table th, .messages-table td {
+    padding: 12px;
+    border-bottom: 1px solid #334155;
+    text-align: left;
+    vertical-align: top;
+}
+.messages-table th { color: #bae6fd; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.message-value { min-width: 280px; max-width: 500px; overflow-wrap: anywhere; }
+
+.status-badge { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
+.status-ham { background: #065f46; color: #a7f3d0; }
+.status-not-ham { background: #991b1b; color: #fecaca; }
+
+.pagination { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 1.5rem; }
+.pagination a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.pagination a:hover { text-decoration: underline; }
+.empty-state { margin: 0; color: #cbd5e1; text-align: center; }
+
+@media (max-width: 640px) {
+    .dashboard-wrapper { width: min(100% - 24px, 1200px); margin: 24px auto; }
+    .dashboard-card { padding: 1rem; }
+    .table-controls { align-items: stretch; flex-direction: column; }
+    .btn-filter { width: 100%; }
+}

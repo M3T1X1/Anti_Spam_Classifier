@@ -129,7 +129,7 @@ def login():
             session['name'] = user.name
             session['surname'] = user.surname
             flash(f'Logged in as {user.name} {user.surname}!', 'success')
-            return redirect(url_for('index'))
+            return redirect(url_for('dashboard'))
 
         flash('Invalid email or password', 'danger')
         return redirect(url_for('login'))
@@ -145,62 +145,105 @@ def logout():
     return redirect(url_for('login'))
 
 
+@app.route("/", methods=["GET", "POST"])
+def index_redirect():
+    """Redirect to dashboard or handle a legacy analyser form submission."""
+    if 'email' in session:
+        if request.method == "POST":
+            return dashboard()
+        return redirect(url_for('dashboard'))
+    return redirect(url_for('login'))
+
+
+@app.route("/dashboard", methods=["GET", "POST"])
+def dashboard():
+    """Analyse a message and display the signed-in user's saved history."""
+    result = None
+    if request.method == "POST":
+        user_input = request.form.get("message", "").strip()
+        if user_input:
+            try:
+                predictions = get_classifier()(user_input)
+                raw_label = predictions[0]['label']
+                result = LABEL_MAP.get(raw_label, "unknown")
+
+                # Only authenticated users have their analyses saved.
+                if 'email' in session:
+                    db.session.add(Message(
+                        email=session['email'],
+                        value=user_input,
+                        is_ham=(result == 'ham')
+                    ))
+                    db.session.commit()
+            except Exception as err:
+                db.session.rollback()
+                print(f"Error message: {str(err)}")
+                result = "Internal error"
+
+    page = max(request.args.get('page', 1, type=int), 1)
+    sort_by = request.args.get('sort', 'date_desc', type=str)
+    filter_ham = request.args.get('filter', 'all', type=str)
+
+    valid_sorts = {'date_desc', 'date_asc', 'type_asc', 'type_desc'}
+    valid_filters = {'all', 'ham', 'not_ham'}
+    if sort_by not in valid_sorts:
+        sort_by = 'date_desc'
+    if filter_ham not in valid_filters:
+        filter_ham = 'all'
+
+    # Only messages belonging to the currently logged-in user are visible.
+    # Guests can open this page but have no persisted history.
+    if 'email' in session:
+        query = Message.query.filter_by(email=session['email'])
+    else:
+        query = Message.query.filter_by(email='')
+
+    # Apply filter
+    if filter_ham == 'ham':
+        query = query.filter_by(is_ham=True)
+    elif filter_ham == 'not_ham':
+        query = query.filter_by(is_ham=False)
+
+    # Apply sorting
+    if sort_by == 'date_asc':
+        query = query.order_by(Message.created_at.asc())
+    elif sort_by == 'type_asc':
+        query = query.order_by(Message.is_ham.asc(), Message.created_at.desc())
+    elif sort_by == 'type_desc':
+        query = query.order_by(Message.is_ham.desc(), Message.created_at.desc())
+    else:
+        query = query.order_by(Message.created_at.desc())
+
+    # Paginate
+    paginated = query.paginate(page=page, per_page=10, error_out=False)
+    messages = paginated.items
+    total_pages = paginated.pages
+
+    return render_template(
+        "dashboard.html",
+        messages=messages,
+        page=page,
+        total_pages=total_pages,
+        sort_by=sort_by,
+        filter_ham=filter_ham,
+        result=result,
+        user=session.get('name') if 'email' in session else None,
+        is_guest='email' not in session
+    )
+
+
+@app.route("/analyze", methods=["GET", "POST"])
+@login_required
+def try_classifier():
+    """Backward-compatible route for the former standalone analyser."""
+    return redirect(url_for('dashboard'))
+
+
 @app.route("/guest", methods=["GET", "POST"])
 def guest():
-    """Guest mode - no login required"""
-    result = None
-    if request.method == "POST":
-        user_input = request.form.get("message")
-        if user_input and user_input.strip():
-            try:
-                clf = get_classifier()
-                predictions = clf(user_input.strip())
-
-                print("User message: ", user_input)
-                print(f"[DEBUG RAW PREDICTION] {predictions}")
-                raw_label = predictions[0]['label']
-                result = LABEL_MAP.get(raw_label, "unknown")
-                print(f"[DEBUG MAPPED RESULT] {result}")
-
-            except Exception as err:
-                print(f"Error message: {str(err)}")
-                result = f"Internal error"
-
-    return render_template("try_it.html", result=result, user=None, is_guest=True)
+    """Guest mode uses the dashboard without persisting analyses."""
+    return redirect(url_for('dashboard'))
 
 
-@app.route("/", methods=["GET", "POST"])
-@login_required
-def index():
-    """Main classifier page"""
-    result = None
-    if request.method == "POST":
-        user_input = request.form.get("message")
-        if user_input and user_input.strip():
-            try:
-                clf = get_classifier()
-                predictions = clf(user_input.strip())
-
-                print("User message: ", user_input)
-                print(f"[DEBUG RAW PREDICTION] {predictions}")
-                raw_label = predictions[0]['label']
-                result = LABEL_MAP.get(raw_label, "unknown")
-                print(f"[DEBUG MAPPED RESULT] {result}")
-
-                message = Message(
-                    email=session['email'],
-                    value=user_input.strip(),
-                    is_ham=(result == 'ham')
-                )
-                db.session.add(message)
-                db.session.commit()
-
-            except Exception as err:
-                print(f"Error message: {str(err)}")
-                result = f"Internal error"
-
-    return render_template("try_it.html", result=result, user=session.get('name'), is_guest=False)
-
-
-if __name__ == "__main__":
+if __name__ == "__main__":testowy123@wp.pl
     app.run(debug=True, use_reloader=False)
