@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rejestracja</title>
+    <title>Sign Up</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     <div class="auth-container">
         <div class="auth-card">
-            <h2>Utwórz konto</h2>
+            <h2>Create Account</h2>
             
             {% with messages = get_flashed_messages(with_categories=true) %}
                 {% if messages %}
@@ -26,30 +26,30 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="name">Imię:</label>
+                    <label for="name">First Name:</label>
                     <input type="text" id="name" name="name" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="surname">Nazwisko:</label>
+                    <label for="surname">Last Name:</label>
                     <input type="text" id="surname" name="surname" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="password">Hasło (minimum 6 znaków):</label>
+                    <label for="password">Password (minimum 6 characters):</label>
                     <input type="password" id="password" name="password" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="password_confirm">Potwierdź hasło:</label>
+                    <label for="password_confirm">Confirm Password:</label>
                     <input type="password" id="password_confirm" name="password_confirm" required>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Zarejestruj się</button>
+                <button type="submit" class="btn btn-primary">Sign Up</button>
             </form>
 
             <p class="auth-link">
-                Już masz konto? <a href="{{ url_for('login') }}">Zaloguj się</a>
+                Already have an account? <a href="{{ url_for('login') }}">Sign In</a>
             </p>
         </div>
     </div>

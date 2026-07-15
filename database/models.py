@@ -10,6 +10,8 @@ class User(db.Model):
     role = db.Column(db.String, default='user')
     created_at = db.Column(db.DateTime, server_default=db.func.now())
     modified_at = db.Column(db.DateTime, onupdate=db.func.now())
+    messages = db.relationship('Message', backref='user', cascade='all, delete-orphan')
+    plots = db.relationship('Plot', backref='user', cascade='all, delete-orphan')
 
     def set_password(self, password):
         """Hash and set password"""
@@ -25,6 +27,7 @@ class User(db.Model):
 class Message(db.Model):
     __tablename__ = 'messages'
     message_id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String, db.ForeignKey('users.email'), nullable=False)
     value = db.Column(db.String(10000))
     is_ham = db.Column(db.Boolean)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
@@ -32,6 +35,7 @@ class Message(db.Model):
 class Plot(db.Model):
     __tablename__ = 'plots'
     plot_id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
+    email = db.Column(db.String, db.ForeignKey('users.email'), nullable=False)
     path = db.Column(db.String)
     plot_name = db.Column(db.String)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())

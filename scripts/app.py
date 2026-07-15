@@ -38,7 +38,7 @@ def get_classifier():
                 "text-classification",
                 model=MODEL_DIR,
                 tokenizer=MODEL_DIR,
-                device=-1,  # CPU
+                device=-1,
                 local_files_only=True
             )
 
@@ -59,7 +59,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'email' not in session:
-            flash('Zaloguj się, aby uzyskać dostęp', 'warning')
+            flash('Please log in to access this page', 'warning')
             return redirect(url_for('login'))
         return f(*args, **kwargs)
     return decorated_function
@@ -81,19 +81,19 @@ def register():
         surname = request.form.get("surname")
 
         if not all([email, password, password_confirm, name, surname]):
-            flash('Wszystkie pola są wymagane', 'danger')
+            flash('All fields are required', 'danger')
             return redirect(url_for('register'))
 
         if password != password_confirm:
-            flash('Hasła się nie zgadzają', 'danger')
+            flash('Passwords do not match', 'danger')
             return redirect(url_for('register'))
 
         if len(password) < 6:
-            flash('Hasło musi mieć co najmniej 6 znaków', 'danger')
+            flash('Password must be at least 6 characters long', 'danger')
             return redirect(url_for('register'))
 
         if User.query.filter_by(email=email).first():
-            flash('Email już zarejestrowany', 'danger')
+            flash('Email already registered', 'danger')
             return redirect(url_for('register'))
 
         user = User(email=email, name=name, surname=surname)
@@ -102,11 +102,11 @@ def register():
         try:
             db.session.add(user)
             db.session.commit()
-            flash('Rejestracja pomyślna! Możesz się teraz zalogować.', 'success')
+            flash('Registration successful! You can now log in.', 'success')
             return redirect(url_for('login'))
         except Exception as e:
             db.session.rollback()
-            flash(f'Błąd rejestracji: {str(e)}', 'danger')
+            flash(f'Registration error: {str(e)}', 'danger')
             return redirect(url_for('register'))
 
     return render_template("register.html")
@@ -120,7 +120,7 @@ def login():
         password = request.form.get("password")
 
         if not email or not password:
-            flash('Email i hasło są wymagane', 'danger')
+            flash('Email and password are required', 'danger')
             return redirect(url_for('login'))
 
         user = User.query.filter_by(email=email).first()
@@ -129,10 +129,10 @@ def login():
             session['email'] = email
             session['name'] = user.name
             session['surname'] = user.surname
-            flash(f'Zalogowano jako {user.name} {user.surname}!', 'success')
+            flash(f'Logged in as {user.name} {user.surname}!', 'success')
             return redirect(url_for('index'))
 
-        flash('Email lub hasło nieprawidłowe', 'danger')
+        flash('Invalid email or password', 'danger')
         return redirect(url_for('login'))
 
     return render_template("login.html")
@@ -142,7 +142,7 @@ def login():
 def logout():
     """User logout"""
     session.clear()
-    flash('Wylogowano pomyślnie', 'info')
+    flash('Logged out successfully', 'info')
     return redirect(url_for('login'))
 
 
@@ -165,6 +165,7 @@ def index():
                 print(f"[DEBUG MAPPED RESULT] {result}")
 
                 message = Message(
+                    email=session['email'],
                     value=user_input.strip(),
                     is_ham=(result == 'ham')
                 )

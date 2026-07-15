@@ -13,8 +13,8 @@
                 <h1>Security Classifier</h1>
                 <div class="user-info">
                     {% if user %}
-                        <span>Zalogowano jako: <strong>{{ user }}</strong></span>
-                        <a href="{{ url_for('logout') }}" class="btn btn-logout">Wyloguj</a>
+                        <span>Logged in as: <strong>{{ user }}</strong></span>
+                        <a href="{{ url_for('logout') }}" class="btn btn-logout">Sign Out</a>
                     {% endif %}
                 </div>
             </div>
