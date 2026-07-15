@@ -9,6 +9,7 @@ base_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(base_dir))
 
 from flask import Flask, render_template, request, redirect, url_for, session, flash
+from sqlalchemy import func
 from transformers import pipeline
 from database.models import User, Message, Plot
 from database.db import db, init_db
@@ -191,12 +192,12 @@ def dashboard():
     if filter_ham not in valid_filters:
         filter_ham = 'all'
 
-    # Only messages belonging to the currently logged-in user are visible.
-    # Guests can open this page but have no persisted history.
+    # Signed-in users see their own history. Guests can browse all messages
+    # already saved by authenticated users, but their own analyses are not saved.
     if 'email' in session:
         query = Message.query.filter_by(email=session['email'])
     else:
-        query = Message.query.filter_by(email='')
+        query = Message.query
 
     # Apply filter
     if filter_ham == 'ham':
@@ -232,6 +233,28 @@ def dashboard():
     )
 
 
+@app.route("/analytics", methods=["GET"])
+@login_required
+def analytics():
+    """Show interactive classification statistics for the signed-in user."""
+    classification_counts = dict(
+        db.session.query(Message.is_ham, func.count(Message.message_id))
+        .filter(Message.email == session['email'])
+        .group_by(Message.is_ham)
+        .all()
+    )
+    ham_count = classification_counts.get(True, 0)
+    not_ham_count = classification_counts.get(False, 0)
+
+    return render_template(
+        "analytics.html",
+        user=session.get('name'),
+        ham_count=ham_count,
+        not_ham_count=not_ham_count,
+        total_count=ham_count + not_ham_count
+    )
+
+
 @app.route("/analyze", methods=["GET", "POST"])
 @login_required
 def try_classifier():
@@ -245,5 +268,5 @@ def guest():
     return redirect(url_for('dashboard'))
 
 
-if __name__ == "__main__":testowy123@wp.pl
-    app.run(debug=True, use_reloader=False)
+if __name__ == "__main__":
+    app.run(debug=True)

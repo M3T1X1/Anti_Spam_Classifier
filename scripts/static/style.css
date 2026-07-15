@@ -252,6 +252,10 @@ button:hover { opacity: 0.9; }
 .dashboard-header { margin-bottom: 1.5rem; }
 .dashboard-header h1 { margin: 0 0 0.5rem; }
 .dashboard-header p { color: #cbd5e1; margin: 0; }
+.page-heading { display: flex; justify-content: space-between; gap: 1rem; align-items: flex-start; }
+.top-actions, .auth-actions { display: flex; align-items: center; gap: 0.75rem; }
+.auth-actions { position: absolute; top: 20px; right: 20px; }
+.btn-analytics { background: #0c4a6e; color: #bae6fd; font-size: 0.85rem; padding: 8px 16px; display: inline-block; }
 .dashboard-card { padding: 1.5rem; }
 .analyzer-card { margin-bottom: 1.5rem; }
 .analyzer-label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
@@ -297,9 +301,23 @@ button:hover { opacity: 0.9; }
 .pagination a:hover { text-decoration: underline; }
 .empty-state { margin: 0; color: #cbd5e1; text-align: center; }
 
+/* Data analysis */
+.analytics-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+.summary-card { background: var(--card-bg); border-radius: 12px; padding: 1.25rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); }
+.summary-card span { color: #cbd5e1; display: block; font-size: 0.9rem; }
+.summary-card strong { display: block; font-size: 2rem; margin-top: 0.4rem; }
+.chart-card h2 { margin: 0 0 0.5rem; }
+.chart-card p { color: #cbd5e1; margin: 0 0 1.5rem; }
+.chart-container { height: 360px; position: relative; }
+
 @media (max-width: 640px) {
     .dashboard-wrapper { width: min(100% - 24px, 1200px); margin: 24px auto; }
     .dashboard-card { padding: 1rem; }
     .table-controls { align-items: stretch; flex-direction: column; }
     .btn-filter { width: 100%; }
+    .page-heading { align-items: stretch; flex-direction: column; }
+    .top-actions { width: 100%; }
+    .top-actions .btn { flex: 1; }
+    .analytics-summary { grid-template-columns: 1fr; }
+    .chart-container { height: 280px; }
 }

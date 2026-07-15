@@ -9,12 +9,26 @@
 <body>
     <main class="dashboard-wrapper">
         <header class="dashboard-header">
-            <h1>Message history</h1>
-            {% if user %}
-                <p>Saved analyses for {{ user }}.</p>
-            {% else %}
-                <p>Sign in to view your saved analyses.</p>
-            {% endif %}
+            <div class="page-heading">
+                <div>
+                    <h1>Message history</h1>
+                    {% if user %}
+                        <p>Saved analyses for {{ user }}.</p>
+                    {% else %}
+                        <p>Sign in to view your saved analyses.</p>
+                    {% endif %}
+                </div>
+                {% if user %}
+                    <nav class="top-actions" aria-label="Account navigation">
+                        <a href="{{ url_for('analytics') }}" class="btn btn-analytics">Data analysis</a>
+                        <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+                    </nav>
+                {% else %}
+                    <nav class="top-actions" aria-label="Guest navigation">
+                        <a href="{{ url_for('login') }}" class="btn btn-analytics">Log in</a>
+                    </nav>
+                {% endif %}
+            </div>
         </header>
 
         {% with notifications = get_flashed_messages(with_categories=true) %}

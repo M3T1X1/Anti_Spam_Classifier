@@ -14,6 +14,7 @@
                 <div class="user-info">
                     {% if user %}
                         <span>Logged in as: <strong>{{ user }}</strong></span>
+                        <a href="{{ url_for('analytics') }}" class="btn btn-analytics">Data analysis</a>
                         <a href="{{ url_for('logout') }}" class="btn btn-logout">Sign Out</a>
                     {% elif is_guest %}
                         <span>Guest Mode</span>

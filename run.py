@@ -14,4 +14,4 @@ sys.path.insert(0, str(project_root))
 from scripts.app import app
 
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=True)

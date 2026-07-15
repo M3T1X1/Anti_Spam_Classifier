@@ -7,6 +7,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    {% if session.get('email') %}
+        <nav class="auth-actions" aria-label="Account navigation">
+            <a href="{{ url_for('analytics') }}" class="btn btn-analytics">Data analysis</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-logout">Logout</a>
+        </nav>
+    {% endif %}
     <div class="auth-container">
         <div class="auth-card">
             <h2>Create Account</h2>
