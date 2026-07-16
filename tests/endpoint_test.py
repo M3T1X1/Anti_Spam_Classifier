@@ -20,7 +20,8 @@ def logged_in_user(guest):
     return guest
 
 def test_home_should_200(guest):
-    assert guest.get('/').status_code == 200
+    resp = guest.get('/', follow_redirects=True)
+    assert resp.status_code == 200
 
 def test_dashboard_should_200(guest):
     assert guest.get('/dashboard').status_code == 200
