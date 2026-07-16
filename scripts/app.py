@@ -21,7 +21,6 @@ MODEL_DIR = str(BASE_DIR / 'distilbert_spam_model' )
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = 'your-secret-key-change-this'
 init_db(app)
 
 classifier = None
@@ -322,6 +321,6 @@ def guest():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, use_reloader=False)
+    app.run(debug=False, use_reloader=False)
 
 
