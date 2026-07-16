@@ -54,15 +54,15 @@ Runs fully offline: the model loads from disk (`HF_HUB_OFFLINE=1`, `local_files_
 
 ### Routes
 
-| Route | Methods | Auth | Purpose |
-|---|---|---|---|
-| `/register`, `/login`, `/logout` | GET/POST | No | Account creation, sign-in, sign-out |
-| `/` | GET/POST | No | Redirects to `/dashboard` or `/login` |
-| `/dashboard` | GET/POST | Dual | Classify a message; persist only if logged in; paginated/filterable/sortable shared history |
-| `/message-feedback` | POST | Yes | Mark a prediction correct/incorrect (own messages only) |
-| `/analytics` | GET | Yes | Aggregate counts (ham/not-ham, correct/incorrect), scope `all` or `mine` |
-| `/analyze`, `/guest` | — | — | Legacy redirects to `/dashboard` |
-| `/favicon.png` | GET | No | Static asset |
+| Route | Methods  | Purpose                                                                                     |
+|---|---|---------------------------------------------------------------------------------------------|
+| `/register`, `/login`, `/logout` | GET/POST  | Account creation, sign-in, sign-out                                                         |
+| `/` | GET/POST | Redirects to `/dashboard` or `/login`                                                       |
+| `/dashboard` | GET/POST | Classify a message; persist only if logged in; paginated/filterable/sortable shared history |
+| `/message-feedback` | POST | Mark a prediction correct/incorrect (own messages only)                                     |
+| `/analytics` | GET | Aggregate counts (ham/not-ham, correct/incorrect), scope `all` or `mine`                    |
+| `/analyze`, `/guest` | — |  Legacy redirects to `/dashboard`                                                           |
+| `/favicon.png` | GET | Static asset                                                                                |
 
 Dashboard history is **shared across all users**, not private. Analytics renders two Chart.js bar charts with JPG/PDF export via jsPDF.
 
