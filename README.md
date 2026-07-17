@@ -95,7 +95,8 @@ Runs automatically before every `run.py` startup; the app refuses to launch on f
 
 ## 10. Running the Application
 
-    TODO when the docker is ready
+    docker build -t spam_classifier .
+    docker run -p 5000:5000 -e SECRET_KEY=key -v $(pwd)/db.sqlite3:/app/db.sqlite3 spam_classifier    
 
 ## 11. Screenshots
 

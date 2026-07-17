@@ -23,7 +23,6 @@ MODEL_DIR = str(BASE_DIR / 'distilbert_spam_model' )
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-#when deploying, remember to put this into .env file
 app.secret_key = os.environ.get("SECRET_KEY")
 init_db(app)
 
@@ -325,6 +324,6 @@ def guest():
 
 
 if __name__ == "__main__":
-    app.run(debug=False, use_reloader=False)
+    app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
 
 

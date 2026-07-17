@@ -13,6 +13,7 @@ project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
 from scripts.app import app
+from scripts.donwolad_model import setup_model
 
 def run_tests(): # to be deleted when deploying
     result = subprocess.run([sys.executable, "-m", "pytest", "tests/", "-v"], cwd=str(project_root))
@@ -24,9 +25,10 @@ def run_tests(): # to be deleted when deploying
 
 if __name__ == "__main__":
     run_tests()
+    setup_model()
 
     with app.app_context():
         db.create_all()
         seed.seed()
 
-    app.run(debug=False, use_reloader=False)
+    app.run(host='0.0.0.0', port=5000, debug=False, use_reloader=False)
