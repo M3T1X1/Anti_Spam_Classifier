@@ -16,19 +16,20 @@ Runs fully offline: the model loads from disk (`HF_HUB_OFFLINE=1`, `local_files_
 
 ## 2. Repository Structure
 
-| Path | Description |
-|---|---|
-| `run.py` | Entry point: runs tests → creates DB → seeds demo data → starts Flask |
-| `requirements.txt` | 123 Python dependencies |
-| `dataset.csv` / `dataset_augmented.csv` | Original / augmented labeled dataset (`TEXT`, `LABEL`) |
-| `scripts/app.py` | Flask app: routes, auth, classification |
-| `scripts/data_augmentation.py` | Sentence-splitting augmentation |
-| `scripts/pipline_setup.py` | DistilBERT fine-tuning pipeline |
-| `scripts/seed.py` / `reset_db.py` | Demo data seeding / full DB wipe |
-| `database/db.py`, `database/models.py` | SQLAlchemy setup & models (`User`, `Message`, `Plot`) — *inferred from usage, not directly retrieved* |
-| `scripts/templates/*.html` | `login`, `register`, `dashboard`, `analytics` |
-| `scripts/static/style.css` | Dark-themed stylesheet |
-| `tests/*` | Pytest suite incl. dedicated SQLi/XSS security tests |
+| Path                                    | Description                                                                                           |
+|-----------------------------------------|-------------------------------------------------------------------------------------------------------|
+| `run.py`                                | Entry point: runs tests → creates DB → seeds demo data → starts Flask                                 |
+| `requirements.txt`                      | 123 Python dependencies                                                                               |
+| `dataset.csv` / `dataset_augmented.csv` | Original / augmented labeled dataset (`TEXT`, `LABEL`)                                                |
+| `scripts/app.py`                        | Flask app: routes, auth, classification                                                               |
+| `scripts/data_augmentation.py`          | Sentence-splitting augmentation                                                                       |
+| `scripts/pipline_setup.py`              | DistilBERT fine-tuning pipeline                                                                       |
+| `scripts/seed.py` / `reset_db.py`       | Demo data seeding / full DB wipe                                                                      |
+| `scripts/donwolad_model.py` / `donwolad_model.py` | Downloads the ML model if not present                                                                 |
+| `database/db.py`, `database/models.py`  | SQLAlchemy setup & models (`User`, `Message`, `Plot`) — *inferred from usage, not directly retrieved* |
+| `scripts/templates/*.html`              | `login`, `register`, `dashboard`, `analytics`                                                         |
+| `scripts/static/style.css`              | Dark-themed stylesheet                                                                                |
+| `tests/*`                               | Pytest suite incl. dedicated SQLi/XSS security tests                                                  |
 
 ## 3. Tech Stack
 
