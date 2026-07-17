@@ -12,7 +12,9 @@ from sqlalchemy import func
 from transformers import pipeline
 from database.models import User, Message, Plot
 from database.db import db, init_db
+from dotenv import load_dotenv
 
+load_dotenv()
 os.environ["HF_HUB_OFFLINE"] = "1"
 
 CURRENT_FILE = Path(__file__).resolve()
@@ -21,6 +23,8 @@ MODEL_DIR = str(BASE_DIR / 'distilbert_spam_model' )
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+#when deploying, remember to put this into .env file
+app.secret_key = os.environ.get("SECRET_KEY")
 init_db(app)
 
 classifier = None

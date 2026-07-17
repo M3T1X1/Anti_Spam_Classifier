@@ -63,3 +63,4 @@ logs/
 
 /distilbert_spam_model
 /results
+.env
